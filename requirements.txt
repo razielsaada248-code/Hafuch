@@ -1,0 +1,5 @@
+pystray>=0.19
+pillow>=10
+pyobjc-framework-Quartz>=10; sys_platform == "darwin"
+pyobjc-framework-Cocoa>=10; sys_platform == "darwin"
+# dev only: wordfreq (tools/build_wordlists.py), pyinstaller (build)
