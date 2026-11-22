@@ -2,6 +2,8 @@
 # Runs only if this folder is pushed to its own GitHub repo.
 name: mac
 on: [push, workflow_dispatch]
+permissions:
+  contents: write          # to publish the built app as a (private) release
 jobs:
   mac:
     runs-on: macos-latest
@@ -24,5 +26,9 @@ jobs:
       - name: build Hafuch.app
         run: sh build_mac.sh
       - run: cd dist && zip -qr Hafuch-mac.zip Hafuch.app
-      - uses: actions/upload-artifact@v4
-        with: {name: Hafuch-mac, path: dist/Hafuch-mac.zip}
+      # A release, not an artifact: artifacts count against the account's Actions storage (full).
+      - name: publish to release "mac-latest"
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh release view mac-latest >/dev/null 2>&1 ||             gh release create mac-latest --title "Hafuch for Mac (latest build, untested on a real Mac by a person)"               --notes "Built automatically on every push. Unsigned: first open with right-click > Open." --prerelease
+          gh release upload mac-latest dist/Hafuch-mac.zip --clobber
