@@ -25,10 +25,15 @@ jobs:
           PY
       - name: build Hafuch.app
         run: sh build_mac.sh
-      - run: cd dist && zip -qr Hafuch-mac.zip Hafuch.app
+      # ditto keeps the symlinks inside the app; plain zip breaks them (and the signature)
+      - run: cd dist && ditto -c -k --sequesterRsrc --keepParent Hafuch.app Hafuch-mac.zip
+      - name: the zip opens to a validly signed app
+        run: |
+          mkdir /tmp/check && ditto -x -k dist/Hafuch-mac.zip /tmp/check
+          codesign --verify --deep --strict --verbose=2 /tmp/check/Hafuch.app
       # A release, not an artifact: artifacts count against the account's Actions storage (full).
       - name: publish to release "mac-latest"
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
-          gh release view mac-latest >/dev/null 2>&1 ||             gh release create mac-latest --title "Hafuch for Mac (latest build, untested on a real Mac by a person)"               --notes "Built automatically on every push. Unsigned: first open with right-click > Open." --prerelease
+          gh release view mac-latest >/dev/null 2>&1 ||             gh release create mac-latest --title "Hafuch for Mac (latest build, untested on a real Mac by a person)"               --notes "Built automatically on every push. Not notarized by Apple: after the first try, System Settings > Privacy & Security > Open Anyway." --prerelease
           gh release upload mac-latest dist/Hafuch-mac.zip --clobber
