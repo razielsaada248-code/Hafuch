@@ -38,6 +38,8 @@ KEYCODES = {
 NAMES = {49: 'space', 48: 'tab', 36: 'enter', 76: 'enter', 51: 'backspace',
          113: 'pause',  # F15 - Macs have no Pause key
          57: 'capslock'}
+NAMES.update({122: 'f1', 120: 'f2', 99: 'f3', 118: 'f4', 96: 'f5', 97: 'f6', 98: 'f7', 100: 'f8',
+              101: 'f9', 109: 'f10', 103: 'f11', 111: 'f12', 105: 'f13', 107: 'f14'})
 KC_DELETE, KC_RETURN, KC_TAB, KC_C, KC_V = 51, 36, 48, 8, 9
 LAYOUT_CHANGED = 'com.apple.Carbon.TISNotifySelectedKeyboardInputSourceChanged'
 

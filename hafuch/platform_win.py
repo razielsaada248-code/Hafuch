@@ -102,6 +102,8 @@ NAMES = {0x08: 'backspace', 0x09: 'tab', 0x0D: 'enter', 0x20: 'space', 0x13: 'pa
          0x10: 'shift', 0xA0: 'shift', 0xA1: 'shift', 0x14: 'capslock',
          0x11: 'ctrl', 0xA2: 'ctrl', 0xA3: 'ctrl', 0x12: 'alt', 0xA4: 'alt', 0xA5: 'alt',
          0x5B: 'win', 0x5C: 'win'}
+NAMES.update({0x70 + i: f'f{i + 1}' for i in range(24)})
+NAMES[0x03] = 'pause'          # Ctrl+Pause arrives as VK_CANCEL   # F1-F24 (usable as hotkeys)
 MOD_VKS = {'shift': 0x10, 'ctrl': 0x11, 'alt': 0x12}
 
 

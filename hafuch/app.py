@@ -30,9 +30,7 @@ AUTO_BOUNDARIES = {'space'}      # Enter may already have sent a chat message
 IGNORED = {'shift', 'capslock', 'ctrl', 'alt', 'win'}
 
 
-def parse_hotkey(s):
-    parts = s.lower().replace(' ', '').split('+')
-    return frozenset(parts[:-1]), parts[-1]
+from .hotkeys import parse as parse_hotkey  # noqa: E402
 
 
 class Controller:
@@ -42,6 +40,7 @@ class Controller:
         self.dry_run = dry_run
         self.engine = Engine(min_len=cfg.get('min_word_length', 2))
         self.enabled = True                    # whole app (tray pause)
+        self.suspended = False                 # settings window open: keys there are being recorded
         self.auto = cfg.get('auto_convert', True)
         self.jobs = queue.Queue()
         self.window = None
@@ -59,17 +58,29 @@ class Controller:
         threading.Thread(target=self._worker, daemon=True, name='hafuch-worker').start()
 
     def _load_hotkeys(self):
-        self.hotkeys = {}
+        hk = {}
         for action, keys in self.cfg.get('hotkeys', {}).items():
             for k in ([keys] if isinstance(keys, str) else keys):
-                self.hotkeys[parse_hotkey(k)] = action
+                if k:
+                    hk[parse_hotkey(k)] = action
+        self.hotkeys = hk                      # swapped in one step (the hook thread reads it)
+
+    def reload(self, cfg):
+        """Settings were saved in the settings window: take the new values now."""
+        with self.lock:
+            self.cfg = cfg
+            self.auto = cfg.get('auto_convert', False)
+            self.engine.min_len = cfg.get('min_word_length', 2)
+            self.engine.reset()
+            self._load_hotkeys()
+        self.on_change()
 
     # ---------- called on the hook thread ----------
     def on_key(self, name, key_id, mods, window, replay=False):
         """name: 'char', 'space', 'backspace', 'pause', ... ; key_id for 'char';
         mods: set of 'shift','ctrl','alt','win'. replay: a key we held and gave back.
         Returns True to swallow the key."""
-        if not self.enabled:
+        if not self.enabled or self.suspended:
             return False
         if DEBUG and name != 'char':           # tests only: control keys, never letters
             print('key', name, sorted(mods), 'replay' if replay else '', flush=True)

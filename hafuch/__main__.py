@@ -8,7 +8,12 @@ def main():
     ap = argparse.ArgumentParser(prog='hafuch')
     ap.add_argument('--dry-run', action='store_true', help='print decisions, type nothing')
     ap.add_argument('--no-tray', action='store_true', help='run without tray icon (Ctrl+C to quit)')
+    ap.add_argument('--settings', action='store_true', help='open the settings window and exit')
     args = ap.parse_args()
+
+    if args.settings:                          # its own process: no hook, no single-instance lock
+        from . import settings
+        sys.exit(settings.run())
 
     if sys.platform == 'win32':
         from . import platform_win as pm

@@ -84,17 +84,19 @@ def run_tests(root, text, hwnd):
     try:
         run_suite(root, auto=True)
         run_suite(root, auto=False)
+        run_suite(root, auto=False, hotkeys={'convert_word': ['ctrl+alt+h', 'f9'],
+                                             'convert_selection': ['ctrl+alt+k']})
     finally:
         root.cmds.put(('done', None))
 
 
-def run_suite(root, auto):
+def run_suite(root, auto, hotkeys=None):
     plat = pw.WindowsPlatform()
     cmd = [EXE, '--no-tray'] if EXE else [sys.executable, '-m', 'hafuch', '--no-tray']
     import json, tempfile
     cfg_dir = tempfile.mkdtemp(prefix='hafuch-test-')
     with open(os.path.join(cfg_dir, 'config.json'), 'w') as f:
-        json.dump({'auto_convert': auto}, f)
+        json.dump({'auto_convert': auto, **({'hotkeys': hotkeys} if hotkeys else {})}, f)
     env = dict(os.environ, HAFUCH_CONFIG_DIR=cfg_dir)
     proc = subprocess.Popen(cmd, cwd=ROOT, env=env,
                             stdout=subprocess.DEVNULL if EXE else subprocess.PIPE,
@@ -130,6 +132,16 @@ def run_suite(root, auto):
             plat.set_layout(lang)
             time.sleep(0.4)
 
+        if hotkeys:                                   # keys chosen in the settings window
+            clear(); set_layout('en')
+            type_keys('akuo'); tap_vk(0x48, (0x11, 0x12)); check('custom Ctrl+Alt+H flips the word', 'שלום', 'he')
+            clear(); set_layout('en')
+            type_keys('akuo'); tap_vk(0x78); check('custom F9 flips the word', 'שלום', 'he')
+            clear(); set_layout('en')
+            type_keys('akuo'); tap_vk(0x13); check('old Pause no longer flips', 'akuo', 'en')
+            clear(); set_layout('en')
+            ui('fill'); tap_vk(0x4B, (0x11, 0x12)); check('custom Ctrl+Alt+K flips selection', 'שלום תודה', 'he')
+            return
         if not auto:                                  # the user's real mode: manual only
             clear(); set_layout('en')
             type_keys('akuo the '); check('manual mode: nothing changes by itself', 'akuo the ', 'en')

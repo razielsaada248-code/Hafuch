@@ -27,7 +27,8 @@ updated: 2026-11-22
 
 ## הבדלים מווינדוס
 - אין מקש Pause במק: Ctrl+Shift+Space (או F15 במקלדת מלאה)
-- Shift+Pause לטקסט מסומן הופך ל-Shift+F15, ובמקלדת בלי F15 צריך להוסיף קיצור ב-`config.json` (`convert_selection`)
+- Shift+Pause לטקסט מסומן הופך ל-Shift+F15, ובמקלדת בלי F15 מוסיפים קיצור בחלון ההגדרות (התפריט > הגדרות...)
+- בחלון ההגדרות: אם המקלדת בעברית, אותיות לא נקלטות כקיצור ("המקש לא נתמך"). לעבור לאנגלית לפני שבוחרים. Option = Alt, Cmd = Win. לא נבדק על מק
 - ההגדרות: `~/Library/Application Support/Hafuch/config.json`
 - "הפעל עם המחשב" יוצר קובץ ב-`~/Library/LaunchAgents/com.hafuch.app.plist`
 - אפליקציה לא חתומה: בפתיחה ראשונה - קליק ימני > פתח. להפצה למשתמשים צריך חשבון Apple Developer (99$ לשנה) וחתימה + notarization

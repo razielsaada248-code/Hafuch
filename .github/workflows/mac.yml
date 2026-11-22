@@ -13,7 +13,7 @@ jobs:
         with: {python-version: '3.12'}
       - run: python -m pip install -r requirements.txt pyinstaller
       - name: unit tests + simulated-Mac tests
-        run: python -m unittest tests.test_engine tests.test_mac_logic -v
+        run: python -m unittest tests.test_engine tests.test_mac_logic tests.test_hotkeys -v
       - name: real Apple APIs load (Quartz, AppKit, Carbon TIS)
         run: |
           python - <<'PY'
