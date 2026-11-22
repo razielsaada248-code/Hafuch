@@ -4,6 +4,7 @@ Exit code 0 = saved; the running Hafuch then reloads config.json.
 The tray pauses Hafuch while this window is open, so even the current hotkey
 can be pressed here to be recorded.
 """
+import os
 import sys
 import time
 import tkinter as tk
@@ -15,6 +16,7 @@ ACTIONS = [('convert_word', 'הפוך את המילה האחרונה'),
            ('convert_selection', 'הפוך טקסט מסומן')]
 SLOTS = 2
 IS_MAC = sys.platform == 'darwin'
+DEBUG = os.environ.get('HAFUCH_DEBUG_KEYS') == '1'
 FONT = ('Segoe UI', 10) if sys.platform == 'win32' else ('Helvetica', 13)
 BOLD = (FONT[0], FONT[1], 'bold')
 
@@ -183,6 +185,8 @@ class SettingsWindow:
     # ---- keys ----
     def on_press(self, event):
         kind, name = key_from_event(event)
+        if DEBUG:                               # what the system really sends (setup only, never while typing elsewhere)
+            print('key', repr(event.keysym), hex(event.keycode), hex(event.state), '->', kind, name, flush=True)
         if not self.capturing:
             if name == 'enter' and not (self.held | mods_from_state(event.state)):
                 self.save()
@@ -193,9 +197,12 @@ class SettingsWindow:
             return 'break'                      # the key that pressed the "שנה" button itself
         if kind == 'mod':
             self.held.add(name)
+            mods = self.held | mods_from_state(event.state)
+            self.labels[self.capturing].configure(
+                text='+'.join(hotkeys.display(m + '+x').split('+')[0] for m in hotkeys.MOD_ORDER if m in mods) + '+...')
             return 'break'
         if kind is None:
-            self.status.configure(text='המקש הזה לא נתמך')
+            self.status.configure(text=f'המקש הזה לא נתמך ({event.keysym})')
             return 'break'
         mods = self.held | mods_from_state(event.state)
         if name == 'escape' and not mods:
